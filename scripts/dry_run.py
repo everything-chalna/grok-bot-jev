@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.config import load_config
 from src.router import route_task
 
 CASES = [
@@ -33,7 +34,10 @@ CASES = [
 
 
 def main() -> int:
-    print("Grok Bot Jev router dry-run\n")
+    cfg = load_config()
+    backend = cfg.get("backend", "typesafe")
+    enabled = cfg.get("enabled", True)
+    print(f"Grok Bot usage router dry-run (backend={backend}, enabled={enabled})\n")
     for i, case in enumerate(CASES, 1):
         out = route_task(case)
         print(f"=== case {i}: {case['goal'][:60]} ===")

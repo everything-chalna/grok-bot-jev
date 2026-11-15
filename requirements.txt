@@ -1,2 +1,5 @@
 typesafe-sdk
+# Decisions support (client.decisions.create) shipped in openai 3.26.0.
+# 3.51.0 is the current release and still exposes POST /v1/decisions.
+openai==3.51.0
 pyyaml

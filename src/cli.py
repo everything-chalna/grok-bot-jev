@@ -10,6 +10,7 @@ def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if not argv:
         print("Usage: python -m src.cli '<json state>'", file=sys.stderr)
+        print("The backend comes from config.yaml: backend: typesafe | openai.", file=sys.stderr)
         return 2
     state = json.loads(argv[0])
     out = route_task(state)

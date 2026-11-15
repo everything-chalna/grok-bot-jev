@@ -10,12 +10,13 @@ python3 -m venv .venv
 cp config.example.yaml config.yaml
 ```
 
-Set `TYPESAFE_API_KEY` in your environment for live Jev calls. For offline checks, set `enabled: false` in `config.yaml`.
+Set `TYPESAFE_API_KEY` in your environment for live TypeSafe calls, or `OPENAI_API_KEY` (an OpenAI Platform API key) when `backend: openai`. For offline checks, set `enabled: false` in `config.yaml`.
 
 ## Checks before a PR
 
 ```bash
 .venv/bin/python -m compileall src scripts
+.venv/bin/python -m unittest discover -s tests -v
 # offline dry-run
 .venv/bin/python -c "import yaml; from pathlib import Path; p=Path('config.yaml'); d=yaml.safe_load(p.read_text()); d['enabled']=False; p.write_text(yaml.safe_dump(d))"
 .venv/bin/python scripts/dry_run.py

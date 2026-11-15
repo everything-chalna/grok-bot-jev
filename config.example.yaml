@@ -1,6 +1,13 @@
 # Copy this file to config.yaml and edit locally.
-# Kill switch: enabled: false, or include "bypass jev" in the request state.
+# Kill switch: enabled: false, or include "bypass jev", "bypass router", or "no jev"
+# in the request state. The default backend is TypeSafe Jev.
 enabled: true
+
+# typesafe uses TypeSafe Jev system_one.
+# openai uses the OpenAI Decisions API (POST /v1/decisions).
+backend: typesafe  # typesafe | openai
+
+# TypeSafe model. The OpenAI backend uses openai.model instead of this value.
 model: jev-latest
 
 # shadow logs advice; active requires the Grok Bot skill to honor route.action.
@@ -14,6 +21,18 @@ thresholds:
 limits:
   max_browser_sources: 5
   max_retries_same_error: 1
+
+# Used only when backend is openai.
+# Authenticate with OPENAI_API_KEY from the OpenAI Platform.
+# A ChatGPT or Codex subscription login is not accepted.
+# Eligible ChatGPT Pro and Business API credits can cover Decisions usage
+# on the linked API organization. See the README.
+openai:
+  model: gpt-6-luna
+  # Choice confidence below this, a refusal, a timeout, or an API error
+  # falls back conservatively: proceed_full, or ask_human for risky actions.
+  confidence_threshold: 0.55
+  timeout_seconds: 20
 
 logging:
   path: logs/runs.jsonl
