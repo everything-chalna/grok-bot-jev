@@ -13,7 +13,9 @@ Grok Bot wakes and loads the skill
     +--> kill switch / bypass marker? ---- yes ---> normal Grok Bot path
     |
     v
-TypeSafe Jev system_one(state, questions)
+configured backend
+    |-- typesafe: TypeSafe Jev system_one(state, questions)
+    |-- openai:   POST /v1/decisions (choice + predicate + score)
     |
     v
 router policy: cache | stop | deterministic | chat | capped research |
@@ -23,7 +25,7 @@ router policy: cache | stop | deterministic | chat | capped research |
 Grok Bot executes the action (active) or treats it as advice (shadow)
 ```
 
-The Python router normalizes state, defines the Jev choice/noul/score questions, applies thresholds and limits, and appends a JSONL decision record. The API key is read only from `TYPESAFE_API_KEY` in the process environment.
+The Python router normalizes state, asks the configured backend to classify it, applies thresholds and limits, and appends a JSONL decision record. Credentials are read only from the process environment: `TYPESAFE_API_KEY` for TypeSafe, or `OPENAI_API_KEY` for OpenAI. The key is never written to the log. The default backend remains TypeSafe.
 
 ## What works
 
@@ -35,9 +37,10 @@ The Python router normalizes state, defines the Jev choice/noul/score questions,
 
 - This is not a Grok Bot middleware or pre-wake interceptor. The bot must wake, load the skill, and make the router call.
 - Shadow mode cannot force behavior. Active mode relies on the installed skill honoring `route.action`.
-- Jev does not perform the browser/research/coding work and does not replace Grok Bot's confirmation or safety policy.
+- Neither backend performs the browser, research, coding, payment, or account work, and neither replaces Grok Bot's confirmation or safety policy.
+- The OpenAI path cannot treat a model choice as approval to send, publish, pay, delete, or change permissions. Those requests come back as `ask_human`.
 - The included A/B results are local proxy measurements, not proof of lower Grok Bot token usage or a universal speedup.
 
 ## Failure behavior
 
-If the router is disabled, bypassed, or unavailable, the safe integration fallback is to return to the normal Grok Bot path rather than inventing a decision. Account and irreversible actions still require human confirmation.
+If the router is disabled or bypassed, it steps aside and returns `proceed_full`. Grok Bot's own confirmation rules still apply. On the OpenAI backend, a low-confidence choice, a refusal, a timeout, or an API error falls back to `proceed_full` for ordinary work and to `ask_human` when the request would send, publish, pay, delete, or change permissions. The TypeSafe path still raises if Jev itself cannot be called, matching its previous behavior.
